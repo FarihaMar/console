@@ -1,0 +1,468 @@
+:root {
+  --primary: #0a162e;
+  --secondary: #0c1524;
+  --border: #283a5a;
+  --text-color: #e0e0e0;
+  --highlight: #1a304e;
+  --button-gradient: linear-gradient(90deg, #0033cc, #6e2edc);
+  --button-blue: #2463eb;
+  --active-tab-color: #0e2b57;
+  --active-tab-border: #3a6fd8;
+  --border: #283a5a;
+}
+
+/* Header with icon */
+.header {
+  background-color: #0a162e;
+  color: white;
+  padding: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: var(--button-blue);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: white;
+}
+
+body {
+  width: 400px;
+  height: 600px;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 13px;
+  color: var(--text-color);
+  background-color: var(--secondary);
+}
+
+.extension-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--secondary);
+  border-radius: 30px 20px; /* This creates the rounded corners for the whole container */
+}
+
+/* Space between header and tabs */
+.header + .nav-tabs {
+  margin-top: 10px;
+}
+
+.nav-tabs {
+  display: flex;
+  margin: 0;
+  padding: 0 10px;
+  list-style: none;
+  background-color: #0a162e;
+  max-width: 100%;
+  border-bottom: 1px solid var(--border); /* Just keep the bottom border */
+  border-radius: 20px; /* This creates the rounded corners for the whole container */
+}
+
+.nav-tabs .nav-item {
+  flex: 1;
+  text-align: center;
+}
+
+.nav-tabs .nav-link {
+  display: block;
+  padding: 14px 0;
+  font-weight: 500;
+  font-size: 14px;
+  color: #8a9ab8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-tabs .nav-link.active {
+  color: white;
+  border-bottom: 1px solid var(--active-tab-border);
+  font-weight: 500;
+  position: relative;
+  /* Light spark/glow effect */
+  text-shadow: 0 0 8px rgba(58, 111, 216, 0.9);
+  
+  /* Animation for subtle pulsing effect */
+  animation: tabGlow 2s infinite ease-in-out;
+
+}
+
+.nav-tabs .nav-link.active:after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--button-blue);
+}
+
+.tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #0c1524;
+}
+
+.tab-pane {
+  flex: 1;
+  display: none;
+  overflow-y: auto;
+}
+
+.tab-pane.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.config-card {
+  background-color: #0f1c2e;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  margin-top: 1px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  margin-top: 1px;
+  color: white;
+  padding-top: 1px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #a0aec0;
+}
+
+/* Fix for input fields */
+.form-control {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #283a5a;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #111c2e;
+  color: var(--text-color);
+  box-sizing: border-box; /* Ensure padding is included in width */
+  max-width: 100%; /* Prevent overflow */
+  overflow: hidden; /* Hide overflow text */
+  text-overflow: ellipsis; /* Add ellipsis for overflow text */
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #3a6fd8;
+}
+
+textarea.form-control {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Custom Toggle Switch Styling */
+.form-switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 0;
+  margin-bottom: 6px;
+}
+
+.form-check-input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 40px;
+  height: 20px;
+  background-color: #111c2e;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0;
+  padding: 0;
+}
+
+.form-check-input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 2px;
+  top: 1px;
+  background-color: #6b7c93;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.form-check-input[type="checkbox"]:checked {
+  background: linear-gradient(90deg, #0033cc, #6e2edc);
+  border-color: #3a6fd8;
+}
+
+.form-check-input[type="checkbox"]:checked::before {
+  background-color: white;
+  transform: translateX(19px);
+}
+
+.form-check-input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(58, 111, 216, 0.3);
+}
+
+.form-check-input[type="checkbox"]:hover {
+  border-color: #3a6fd8;
+}
+
+.text-muted {
+  color: #6b7c93;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Unified button styles with requested gradient */
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(90deg, #0033cc, #6e2edc); /* Updated gradient as requested */
+  color: white;
+  box-shadow: 0 2px 10px rgba(48, 51, 204, 0.3);
+  width: 100%; /* Make buttons full width */
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(48, 51, 204, 0.5);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Secondary button style */
+.btn-outline {
+  background: rgba(11, 22, 44, 0.8);
+  color: white;
+  border: 1px solid #283a5a;
+  box-shadow: none;
+}
+
+.btn-outline:hover {
+  background: rgba(30, 84, 192, 0.1);
+  border-color: #3a6fd8;
+}
+
+.saved-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.saved-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 28, 46, 0.8);
+  border-radius: 8px;
+  border: 1px solid #283a5a;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.saved-button:hover {
+  background: rgba(26, 48, 78, 0.9);
+  border-color: #3a6fd8;
+}
+
+.saved-button-action {
+  color: #3a6fd8;
+  transition: all 0.2s ease;
+  margin-left: auto; /* This pushes the edit button to the right */
+  padding-left: 8px; /* Adds some spacing between text and edit button */
+}
+
+.saved-button-action:hover {
+  color: #5a8fee;
+}
+
+.template-editor {
+  display: none;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.template-editor.active {
+  display: block;
+}
+
+.editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 0;
+  color: #6b7c93;
+  font-size: 14px;
+}
+
+.mt-2 {
+  margin-top: 10px;
+}
+
+
+/* Change the scrollbar styling to match dark theme */
+.tab-pane::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tab-pane::-webkit-scrollbar-track {
+  background: var(--secondary); /* Dark background for scroll track */
+  border-radius: 4px;
+}
+
+.tab-pane::-webkit-scrollbar-thumb {
+  background: var(--border); /* Scroll thumb color */
+  border-radius: 4px;
+}
+
+.tab-pane::-webkit-scrollbar-thumb:hover {
+  background: var(--active-tab-border); /* Hover color */
+}
+
+/* Ensure the scrollable area background matches theme */
+.tab-pane {
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: var(--border) var(--secondary); /* For Firefox */
+  background-color: var(--secondary); /* Dark background */
+}
+
+/* For the tags container specifically */
+.tags-container {
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: var(--border) var(--primary); /* For Firefox */
+}
+
+/* For Firefox compatibility */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) var(--secondary);
+}
+
+.fade-in {
+  animation: fadeIn 0.3s forwards;
+}
+
+/* AI Configuration specific styles */
+.ai-config-container {
+  padding: 0 16px;
+}
+
+/* Tags Container */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0px;
+  min-height: 42px;
+  align-items: center;
+}
+
+/* Individual Tag Box */
+.tag-item {
+  display: inline-flex;
+  align-items: center;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #2463eb7a;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+/* Tag Remove Button */
+.tag-remove {
+  cursor: pointer;
+  margin-left: 8px;
+  font-size: 14px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.tag-remove:hover {
+  opacity: 1;
+}
+
+/* Input Field */
+#titleInput {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--primary);
+  color: var(--text-color);
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+#titleInput:focus {
+  outline: none;
+  border-color: var(--button-blue);
+}
+
+/* Animation for new tags */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Add this to make new tags animate */
+.tag-item {
+  animation: fadeIn 0.2s ease-out;
+}
+

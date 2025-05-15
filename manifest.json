@@ -1,0 +1,67 @@
+{
+  "manifest_version": 3,
+  "name": "AgentLink",
+  "version": "1.0",
+  "description": "Processes LinkedIn invitations, dynamically generates replies for comments and messages, and integrates with AI.",
+  "permissions": ["tabs", "activeTab", "storage", "clipboardWrite"],
+  "host_permissions": [
+    "*://*.linkedin.com/*",
+    "*://openrouter.ai/*",
+    "https://openrouter.ai/api/v1/chat/completions/*"
+  ],
+
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "1st_DM.js",
+        "popup.js",
+        "invitation-processor.js",
+        "personal_DM.js",
+        "livelog.js",
+        "debug_panel.js",
+        "DM_buttons.js"
+      ],
+      "matches": ["*://*.linkedin.com/*"]
+    }
+  ],
+  "icons": {
+ 
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.linkedin.com/mynetwork/*",
+        "*://*.linkedin.com/in/*",
+        "*://*.linkedin.com/feed/*",
+        "*://*.linkedin.com/comments/*"
+      ],
+      "js": [
+        "first_DM.js",
+        "invitation-processor.js",
+        "linkedin-comment.js",
+        "debug-utils.js",
+        "livelog.js",
+        "linkedin-profile-tracker.js",
+        "linkedin-reply.js",
+        "commentTracker.js",
+        "DM_buttons.js"
+        
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["*://*.linkedin.com/messaging/*"],
+      "js": ["personal_DM.js","debug_panel.js","livelog.js"],
+      "run_at": "document_end"
+    }
+
+  ]
+}

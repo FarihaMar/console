@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>LinkedIn Manager Pro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body style="width:500px; min-height:600px; max-width:800px; max-height:600px;">  <div class="extension-container">
+    <div class="header">
+      <span style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;background:linear-gradient(to right,#4d7cfe,#9f7aea);border-radius:5px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#5f6cff"/>
+              <stop offset="100%" stop-color="#a17cf3"/>
+            </linearGradient>
+          </defs>
+          <!-- Full background with rounded corners -->
+          <rect width="40" height="40" rx="8" ry="8" fill="url(#bg)" />
+          
+          <!-- Robot head and features -->
+          <path d="M20 13V7H13" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <rect width="22" height="16" x="9" y="13" rx="3" stroke="white" stroke-width="2.5" fill="none"/>
+          <path d="M6 21h3" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M31 21h3" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M24 19.5v3" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M16 19.5v3" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+              </span>
+      <span>AgentLink</span>
+    </div>
+    <ul class="nav-tabs" id="popupTabs">
+      <li class="nav-item">
+        <a class="nav-link active"  id="template-tab">Message </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link comment-tab" id="comment-tab">Comments</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link personalDm-tab" id="personaldm-tab">DM</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="ai-tab">AI Config</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="criteria-tab">Settings</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <!-- Tone Settings Pane -->
+      <div class="tab-pane active" id="template">
+        <div class="config-card">
+          <h5 class="card-title">Saved Tones</h5>
+          <div id="saved-buttons" class="saved-buttons-container">
+            <div class="empty-state">No templates saved yet</div>
+          </div>
+        </div>
+        <div class="config-card">
+          <h5 class="card-title">Tone Editor</h5>
+          <button id="add-button" class="btn btn-primary btn-block">+ New Tone</button>
+          <div id="template-editor" class="template-editor">
+            <div class="form-group">
+              <label class="form-label" for="template-name">Tone Name</label>
+              <input type="text" id="template-name" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="system-prompt">System Prompt</label>
+              <textarea id="system-prompt" class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="user-prompt">User Prompt</label>
+              <textarea id="user-prompt" class="form-control"></textarea>
+            </div>
+            <div class="editor-actions">
+              <button id="cancel-button" class="btn btn-outline">Cancel</button>
+              <button id="save-button" class="btn btn-primary">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Comment Settings Pane -->
+      <div class="tab-pane" id="comment">
+        <div class="config-card">
+          <h5 class="card-title">Saved Tones</h5>
+          <div id="saved-comments" class="saved-buttons-container">
+            <div class="empty-state">No comments saved yet</div>
+          </div>
+        </div>
+        <div class="config-card">
+          <h5 class="card-title">Tone Editor</h5>
+          <button id="add-comment-button" class="btn btn-comment btn-block">+ New Tone</button>
+          <div id="comment-editor" class="template-editor">
+            <div class="form-group">
+              <label class="form-label" for="comment-name">Tone Name</label>
+              <input type="text" id="comment-name" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="comment-system-prompt">System Prompt</label>
+              <textarea id="comment-system-prompt" class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="comment-user-prompt">User Prompt</label>
+              <textarea id="comment-user-prompt" class="form-control"></textarea>
+            </div>
+            <div class="editor-actions">
+              <button id="cancel-comment-button" class="btn btn-outline">Cancel</button>
+              <button id="save-comment-button" class="btn btn-comment">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal DM Settings Pane -->
+      <div class="tab-pane" id="personaldm">
+        <div class="config-card">
+          <h5 class="card-title">Saved Tones</h5>
+          <div id="saved-personaldms" class="saved-buttons-container">
+            <div class="empty-state">No personal DMs saved yet</div>
+          </div>
+        </div>
+        <div class="config-card">
+          <h5 class="card-title">Tone Editor</h5>
+          <button id="add-personaldm-button" class="btn btn-primary btn-block">+ New Tone</button>
+          <div id="personaldm-editor" class="template-editor">
+            <div class="form-group">
+              <label class="form-label" for="personaldm-name">Tone Name</label>
+              <input type="text" id="personaldm-name" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="personaldm-system-prompt">System Prompt</label>
+              <textarea id="personaldm-system-prompt" class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="personaldm-user-prompt">User Prompt</label>
+              <textarea id="personaldm-user-prompt" class="form-control"></textarea>
+            </div>
+            <div class="editor-actions">
+              <button id="cancel-personaldm-button" class="btn btn-outline">Cancel</button>
+              <button id="save-personaldm-button" class="btn btn-primary">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- AI Configuration Pane -->
+      <div class="tab-pane" id="ai">
+        <div class="config-card">
+          <h5 class="card-title">AI Configuration</h5>
+          <div class="form-group">
+            <label class="form-label" for="ai-model">AI Model</label>
+            <input type="text" id="ai-model" class="form-control" value="deepseek/deepseek-chat:free">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="api-key">API Key</label>
+            <input type="password" id="api-key" class="form-control" value="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" placeholder="sk-xxxxxxxxxx">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="api-url">API Endpoint</label>
+            <input type="text" id="api-url" class="form-control" value="https://openrouter.ai/api/v1/chat/completions">
+          </div>
+          <button id="save-settings" class="btn btn-primary btn-block mt-2">Save Configuration</button>
+        </div>
+      </div>
+      
+  <!-- Criteria Settings Pane -->
+  <div class="tab-pane" id="criteria">
+    <div class="config-card">
+      <h5 class="card-title">Manage Incoming Invitations
+      </h5>
+      <div class="form-group">
+        <label class="form-label" for="titleInput">Job Roles</label>
+        <input type="text" id="titleInput" class="form-control" placeholder="e.g., CEO, Software Engineer, Student, Professor">
+        <small class="text-muted">Enter job roles you want to connect with.</small>
+        <div id="titlesContainer" class="tags-container"></div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="institutionInput">Organizations</label>
+        <input type="text" id="institutionInput" class="form-control" placeholder="e.g., Google, Microsoft, Anna University">
+        <small class="text-muted">Enter company or school names you want to target.</small>
+        <div id="institutionsContainer" class="tags-container"></div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="minConnections">Minimum Shared Connections</label>
+        <input type="number" id="minConnections" class="form-control" min="0" value="0">
+        <small class="text-muted">Only connect with people who have at least this many connections in common with you.</small>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="batchLimit">Invitations to Process</label>
+        <input type="number" id="batchLimit" class="form-control" min="1" value="10">
+        <small class="text-muted">Set the maximum number of received connection invitations to handle.</small>
+      </div>
+      
+      <div class="form-group">
+        <div class="form-switch">
+          <input class="form-check-input" type="checkbox" id="testingMode" checked> 
+          <label class="form-label" for="testingMode">Simulation Mode</label>
+        </div>
+        <small class="text-muted">Enable to test the process without actually accepting the connection requests.</small>
+      </div>
+      
+      <button id="saveCriteria" class="btn btn-primary btn-block">Save Settings</button>
+        <small class="text-muted">Click to apply your preferences.</small>
+    </div>
+  </div>
+    </div>
+  </div>
+
+
+
+  <script src="popup.js"></script>
+</body>
+</html>
