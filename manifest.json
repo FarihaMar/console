@@ -1,67 +1,40 @@
 {
   "manifest_version": 3,
-  "name": "AgentLink",
+  "name": "AgentLink LinkedIn Assistant",
   "version": "1.0",
-  "description": "Processes LinkedIn invitations, dynamically generates replies for comments and messages, and integrates with AI.",
-  "permissions": ["tabs", "activeTab", "storage", "clipboardWrite"],
+  "description": "Injects dynamic AI message buttons into LinkedIn messages and profiles.",
+  "permissions": [
+    "storage",
+    "scripting",
+    "tabs"
+  ],
   "host_permissions": [
-    "*://*.linkedin.com/*",
-    "*://openrouter.ai/*",
-    "https://openrouter.ai/api/v1/chat/completions/*"
+    "https://www.linkedin.com/*"
   ],
-
-  "action": {
-    "default_popup": "popup.html"
-  },
   "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  },
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "1st_DM.js",
-        "popup.js",
-        "invitation-processor.js",
-        "personal_DM.js",
-        "livelog.js",
-        "debug_panel.js",
-        "DM_buttons.js"
-      ],
-      "matches": ["*://*.linkedin.com/*"]
-    }
-  ],
-  "icons": {
- 
-    "128": "icons/icon128.png"
+    "service_worker": "bakground.js"
   },
   "content_scripts": [
-    {
-      "matches": [
-        "*://*.linkedin.com/mynetwork/*",
-        "*://*.linkedin.com/in/*",
-        "*://*.linkedin.com/feed/*",
-        "*://*.linkedin.com/comments/*"
-      ],
-      "js": [
-        "first_DM.js",
-        "invitation-processor.js",
-        "linkedin-comment.js",
-        "debug-utils.js",
-        "livelog.js",
-        "linkedin-profile-tracker.js",
-        "linkedin-reply.js",
-        "commentTracker.js",
-        "DM_buttons.js"
-        
-      ],
-      "run_at": "document_end"
-    },
-    {
-      "matches": ["*://*.linkedin.com/messaging/*"],
-      "js": ["personal_DM.js","debug_panel.js","livelog.js"],
-      "run_at": "document_end"
-    }
+  {
+    "matches": ["https://www.linkedin.com/*"],
+    "js": ["content.js", "livelog.js"],
+    "css": ["styles.css"],
+    "run_at": "document_idle"
+  }
+]
+,
+  "action": {
+  "default_popup": "popup.html",
+  "default_title": "AgentLink Assistant"
+},
+"web_accessible_resources": [{
+  "resources": ["livelog.js", "styles.css"],
+  "matches": ["<all_urls>"]
+}],
 
-  ]
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
 }

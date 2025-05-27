@@ -410,52 +410,60 @@ addPersonalDmButton.addEventListener('click', function () {
   personalDmEditor.classList.add('active');
 });
 
+// In the savePersonalDmButton click handler
 savePersonalDmButton.addEventListener('click', function () {
-  const name = personalDmNameInput.value.trim();
-  const systemPrompt = personalDmSystemPromptInput.value.trim();
-  const userPrompt = personalDmUserPromptInput.value.trim();
-  
-  if (!name) {
-    alert('Please enter a DM template name');
-    return;
-  }
-  
-  // Check for duplicate names
-  const isDuplicate = personalDmConfigs.some(config => 
-    config.name.toLowerCase() === name.toLowerCase() && 
-    config.id !== currentEditingPersonalDmId
-  );
-  
-  if (isDuplicate) {
-    alert('A DM template with this name already exists. Please use a different name.');
-    return;
-  }
-  
-  if (currentEditingPersonalDmId) {
-    // Update existing template
-    const index = personalDmConfigs.findIndex(c => c.id === currentEditingPersonalDmId);
-    if (index !== -1) {
-      personalDmConfigs[index] = {
-        id: currentEditingPersonalDmId,
-        name,
-        systemPrompt,
-        userPrompt
-      };
+    const name = personalDmNameInput.value.trim();
+    const systemPrompt = personalDmSystemPromptInput.value.trim();
+    const userPrompt = personalDmUserPromptInput.value.trim();
+    
+    if (!name) {
+        alert('Please enter a DM template name');
+        return;
     }
-  } else {
-    // Add new template
-    personalDmConfigs.push({
-      id: Date.now().toString(),
-      name,
-      systemPrompt,
-      userPrompt
+    
+    // Check for duplicate names
+    const isDuplicate = personalDmConfigs.some(config => 
+        config.name.toLowerCase() === name.toLowerCase() && 
+        config.id !== currentEditingPersonalDmId
+    );
+    
+    if (isDuplicate) {
+        alert('A DM template with this name already exists. Please use a different name.');
+        return;
+    }
+    
+    if (currentEditingPersonalDmId) {
+        // Update existing template
+        const index = personalDmConfigs.findIndex(c => c.id === currentEditingPersonalDmId);
+        if (index !== -1) {
+            personalDmConfigs[index] = {
+                id: currentEditingPersonalDmId,
+                name,
+                systemPrompt,
+                userPrompt,
+                isDmTemplate: true // Add this flag to identify DM templates
+            };
+        }
+    } else {
+        // Add new template
+        personalDmConfigs.push({
+            id: Date.now().toString(),
+            name,
+            systemPrompt,
+            userPrompt,
+            isDmTemplate: true // Add this flag to identify DM templates
+        });
+    }
+    
+    chrome.storage.local.set({ personalDmConfigs }, function () {
+        personalDmEditor.classList.remove('active');
+        renderSavedPersonalDms();
+        
+        // Send message to content script to refresh buttons
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {action: "refreshButtons"});
+        });
     });
-  }
-  
-  chrome.storage.local.set({ personalDmConfigs }, function () {
-    personalDmEditor.classList.remove('active');
-    renderSavedPersonalDms();
-  });
 });
 
 cancelPersonalDmButton.addEventListener('click', function () {
