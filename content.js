@@ -4,11 +4,11 @@ console.log('LinkedIn Chat Enhancer: Content script loaded');
 class LinkedInChatEnhancer {
     constructor() {
         this.processedMessageBoxes = new WeakSet();
-        this.currentConversation = null;
-        this.lastMessages = [];
+        this.currentUser = this.detectCurrentUser();
+        this.chatContexts = new Map(); // Track contexts per chat
+        this.activeChatId = null;
         this.observer = null;
         this.messageObserver = null;
-        this.currentUser = this.detectCurrentUser();
         this.initStyles();
         this.initObservers();
         this.setupGlobalListeners();
@@ -403,6 +403,25 @@ class LinkedInChatEnhancer {
         setTimeout(() => error.remove(), 5000);
     }
 
+    getChatId(messageContainer) {
+        // Find the closest chat container and use its ID or participant name as identifier
+        const chatContainer = messageContainer.closest('.msg-conversation-container, .msg-thread');
+        if (!chatContainer) return 'default';
+
+        // Try to get participant name first
+        const participantName = chatContainer.querySelector('.msg-thread-breadcrumb__participant-name')?.textContent.trim() || 
+                              chatContainer.querySelector('.msg-s-message-group__name')?.textContent.trim();
+        
+        if (participantName) return `chat-${participantName}`;
+
+        // Fallback to data-id or generate a hash from the container
+        const dataId = chatContainer.getAttribute('data-id');
+        if (dataId) return `chat-${dataId}`;
+
+        // Final fallback - hash the container's HTML
+        return `chat-${Array.from(chatContainer.children).reduce((acc, child) => acc + child.textContent, '').hashCode()}`;
+    }
+
     async injectButtons(messageContainer) {
         if (this.processedMessageBoxes.has(messageContainer)) return;
         this.processedMessageBoxes.add(messageContainer);
@@ -462,75 +481,75 @@ class LinkedInChatEnhancer {
             btn.type = 'button';
 
             btn.addEventListener('click', async (e) => {
-    e.preventDefault();
-    if (btn.disabled) return;
+                e.preventDefault();
+                if (btn.disabled) return;
 
-    const abortController = new AbortController();
-    let isCancelled = false;
+                const chatId = this.getChatId(messageContainer);
+                const abortController = new AbortController();
+                let isCancelled = false;
 
-    const buttons = scrollableContainer.querySelectorAll('.dm-template-btn');
-    const originalTexts = new Map(Array.from(buttons).map(btn => [btn, btn.textContent]));
+                const buttons = scrollableContainer.querySelectorAll('.dm-template-btn');
+                const originalTexts = new Map(Array.from(buttons).map(btn => [btn, btn.textContent]));
 
-    try {
-        // Disable all buttons during generation
-        buttons.forEach(btn => {
-            btn.disabled = true;
-            btn.textContent = 'Generating...';
-        });
+                try {
+                    // Disable all buttons during generation
+                    buttons.forEach(btn => {
+                        btn.disabled = true;
+                        btn.textContent = 'Generating...';
+                    });
 
-        // Get conversation context
-        await this.updateConversationContext();
-        const profileData = await this.gatherCompleteProfileData();
-        const aiSettings = await this.getAISettings();
+                    // Get conversation context for this specific chat
+                    await this.updateConversationContext(chatId);
+                    const profileData = await this.gatherCompleteProfileData();
+                    const aiSettings = await this.getAISettings();
 
-        // Get participant name
-        const participantName = document.querySelector('.msg-thread-breadcrumb__participant-name')?.textContent.trim() || 
-                              document.querySelector('.msg-s-message-group__name')?.textContent.trim() || 
-                              'Unknown';
+                    // Get the context for this specific chat
+                    const context = this.chatContexts.get(chatId) || {};
+                    const participantName = context.participantName || 'Unknown';
 
-        // Get the last message that wasn't from the current user
-        const lastMessageFromThem = [...this.lastMessages].reverse().find(msg => !msg.isCurrentUser);
-        const lastMessageSender = lastMessageFromThem?.sender || participantName;
+                    // Get the last message that wasn't from the current user
+                    const lastMessageFromThem = [...(context.lastMessages || [])].reverse().find(msg => !msg.isCurrentUser);
+                    const lastMessageSender = lastMessageFromThem?.sender || participantName;
 
-        if (config.name === 'Clear') {
-            this.clearMessageText(messageContainer);
-            return;
-        }
+                    if (config.name === 'Clear') {
+                        this.clearMessageText(messageContainer);
+                        return;
+                    }
 
-        const response = await chrome.runtime.sendMessage({
-            action: config.personal ? "generatePersonalDm" : "generateMessage",
-            participantData: {
-                participantName,
-                lastMessages: this.lastMessages,
-                lastMessageSender,
-                isReplyingToLastSender: !!lastMessageFromThem
-            },
-            profileData,
-            config,
-            aiSettings,
-            signal: abortController.signal,
-            conversationContext: {
-                lastMessages: this.lastMessages,
-                isNewConversation: this.lastMessages.length === 0
-            }
-        });
+                    const response = await chrome.runtime.sendMessage({
+                        action: config.personal ? "generatePersonalDm" : "generateMessage",
+                        participantData: {
+                            participantName,
+                            lastMessages: context.lastMessages || [],
+                            lastMessageSender,
+                            isReplyingToLastSender: !!lastMessageFromThem
+                        },
+                        profileData,
+                        config,
+                        aiSettings,
+                        signal: abortController.signal,
+                        conversationContext: {
+                            lastMessages: context.lastMessages || [],
+                            isNewConversation: (context.lastMessages || []).length === 0
+                        }
+                    });
 
-        if (isCancelled) throw new Error('Generation cancelled by user');
-        if (response?.error) throw new Error(response.error);
-        if (!response?.message) throw new Error('AI could not generate message');
+                    if (isCancelled) throw new Error('Generation cancelled by user');
+                    if (response?.error) throw new Error(response.error);
+                    if (!response?.message) throw new Error('AI could not generate message');
 
-        this.insertMessage(response.message, messageContainer);
-    } catch (err) {
-        console.error('Error generating AI message:', err);
-        this.showError(err.message || 'AI could not generate message', buttonWrapper);
-    } finally {
-        // Restore buttons
-        buttons.forEach(btn => {
-            btn.disabled = false;
-            btn.textContent = originalTexts.get(btn) || btn.textContent;
-        });
-    }
-});
+                    this.insertMessage(response.message, messageContainer);
+                } catch (err) {
+                    console.error('Error generating AI message:', err);
+                    this.showError(err.message || 'AI could not generate message', buttonWrapper);
+                } finally {
+                    // Restore buttons
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.textContent = originalTexts.get(btn) || btn.textContent;
+                    });
+                }
+            });
 
             scrollableContainer.appendChild(btn);
         });
@@ -567,52 +586,63 @@ class LinkedInChatEnhancer {
         }
     }
 
-    async updateConversationContext() {
+    async updateConversationContext(chatId = null) {
         try {
-            // Get the active conversation
-            const activeConversation = document.querySelector('.msg-s-message-list') || 
-                                     document.querySelector('.msg-thread');
-            
-            if (!activeConversation) {
-                this.lastMessages = [];
+            if (!chatId) {
+                // If no chatId provided, try to find the active chat
+                const activeChat = document.querySelector('.msg-conversation-container[data-active="true"]') || 
+                                 document.querySelector('.msg-thread[data-active="true"]') ||
+                                 document.querySelector('.msg-conversation-container') || 
+                                 document.querySelector('.msg-thread');
+                
+                if (activeChat) {
+                    chatId = this.getChatId(activeChat);
+                } else {
+                    chatId = 'default';
+                }
+            }
+
+            // Get the message list for this chat
+            const messageList = document.querySelector(`#${chatId} .msg-s-message-list`) || 
+                             document.querySelector(`#${chatId} .msg-thread`) ||
+                             document.querySelector('.msg-s-message-list') || 
+                             document.querySelector('.msg-thread');
+
+            if (!messageList) {
+                this.chatContexts.set(chatId, { lastMessages: [] });
                 return;
             }
 
             // Extract the last 5 messages
-            this.lastMessages = this.extractMessages(5);
+            const lastMessages = this.extractMessages(messageList, 5);
             
-            // Get participant name
-            const participantName = document.querySelector('.msg-thread-breadcrumb__participant-name')?.textContent.trim() || 
-                                  document.querySelector('.msg-s-message-group__name')?.textContent.trim() || 
+            // Get participant name for this specific chat
+            const participantName = messageList.closest('.msg-conversation-container')?.querySelector('.msg-thread-breadcrumb__participant-name')?.textContent.trim() || 
+                                  messageList.querySelector('.msg-s-message-group__name')?.textContent.trim() || 
                                   'Unknown';
             
-            this.currentConversation = {
+            const context = {
                 participantName,
-                lastMessages: this.lastMessages.map(msg => ({
+                lastMessages: lastMessages.map(msg => ({
                     ...msg,
                     isCurrentUser: msg.sender === this.currentUser
                 }))
             };
             
-            // Save to local storage
-            chrome.storage.local.set({
-                conversationContext: {
-                    participantName,
-                    lastMessages: this.lastMessages
-                }
-            });
+            // Store context for this specific chat
+            this.chatContexts.set(chatId, context);
+            
+            // Also update the active chat ID
+            this.activeChatId = chatId;
             
         } catch (error) {
             console.error('Error updating conversation context:', error);
-            this.lastMessages = [];
+            this.chatContexts.set(chatId || 'default', { lastMessages: [] });
         }
     }
 
-    extractMessages(limit = 5) {
+    extractMessages(messageContainer, limit = 5) {
         const messages = [];
-        const messageContainer = document.querySelector('.msg-s-message-list') || 
-                               document.querySelector('.msg-thread');
-        
         if (!messageContainer) return messages;
 
         // Variables to store the last known sender, time, and date
@@ -620,7 +650,7 @@ class LinkedInChatEnhancer {
         let lastKnownTime = null;
         let lastKnownDate = null;
         
-        // Select all message list items
+        // Select all message list items within this container
         const messageItems = messageContainer.querySelectorAll('.msg-s-message-list__event, .msg-event');
         
         // Iterate over all message items
@@ -782,15 +812,20 @@ class LinkedInChatEnhancer {
         return experienceData;
     }
 
-
     setupGlobalListeners() {
         // Listen for message button clicks to open chat windows
         document.addEventListener('click', async (e) => {
             const messageButton = e.target.closest('button[aria-label*="Message"], button[aria-label*="message"]');
             if (messageButton) {
                 setTimeout(() => {
-                    this.updateConversationContext();
-                }, 3000); // Wait for chat window to open
+                    // Find the newly opened chat and update its context
+                    const newChat = document.querySelector('.msg-conversation-container[data-active="true"]') || 
+                                   document.querySelector('.msg-thread[data-active="true"]');
+                    if (newChat) {
+                        const chatId = this.getChatId(newChat);
+                        this.updateConversationContext(chatId);
+                    }
+                }, 1000);
             }
         });
 
@@ -827,18 +862,26 @@ class LinkedInChatEnhancer {
         });
 
         // Observer for message changes in active conversation
-        this.messageObserver = new MutationObserver(() => {
-            this.updateConversationContext();
+        this.messageObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0) {
+                    // Find the closest chat container
+                    const chatContainer = mutation.target.closest('.msg-conversation-container, .msg-thread');
+                    if (chatContainer) {
+                        const chatId = this.getChatId(chatContainer);
+                        this.updateConversationContext(chatId);
+                    }
+                }
+            });
         });
 
-        const messageList = document.querySelector('.msg-s-message-list') || 
-                          document.querySelector('.msg-thread');
-        if (messageList) {
+        // Observe all existing chat containers
+        document.querySelectorAll('.msg-s-message-list, .msg-thread').forEach(messageList => {
             this.messageObserver.observe(messageList, {
                 childList: true,
                 subtree: true
             });
-        }
+        });
 
         // Process existing message containers
         document.querySelectorAll('.msg-form__msg-content-container').forEach(container => {
